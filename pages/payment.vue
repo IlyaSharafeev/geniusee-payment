@@ -39,12 +39,12 @@
               </div>
             </div>
             <div class="contact-info__field-phone">
-              <PhoneInput v-model="paymentForm.phones[0]"/>
+              <PhoneInput v-model="paymentForm.phones[0]" :class="{ 'contact-info__field-phone--error': v$.phones.$error }"/>
               <button @click="addPhoneNumber" :style="{ visibility: paymentForm.phones.length < 3 ? 'visible' : 'hidden' }"><i
                   class="pi pi-plus-circle" style="font-size: 1rem"></i></button>
             </div>
             <div v-for="(phone, index) in paymentForm.phones.slice(1)" :key="index" class="contact-info__field-phone">
-              <PhoneInput v-model="paymentForm.phones[index + 1]"/>
+              <PhoneInput v-model="paymentForm.phones[index + 1]" :class="{ 'contact-info__field-phone--error': v$.phones.$error }"/>
               <button @click="removePhoneNumber(index + 1)"><i class="pi pi-minus-circle" style="font-size: 1rem"></i>
               </button>
             </div>
@@ -214,7 +214,7 @@ const rules = {
   address: { required },
   firstName: { required },
   lastName: { required },
-  phones: { required },
+  phones: { required, hasPhone: value => value.some(phone => phone !== '') },
   checkedAgree: { required, checked: value => value === true },
   selectedCountry: { required },
   cardNumber: {

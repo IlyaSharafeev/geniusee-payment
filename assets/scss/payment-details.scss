@@ -381,8 +381,14 @@
   }
 
   &__field-phone {
+    margin-top: 20px;
     display: flex;
     gap: 25px;
+
+    &--error {
+      border-radius: 11px;
+      border: 1px solid red;
+    }
   }
 
   &__field-country {
