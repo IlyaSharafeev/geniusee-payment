@@ -4,14 +4,24 @@
       <StepperPanel header="Personal information">
         <template #content="{ nextCallback }">
           <div class="personal-information base-shadow">
-            <FloatLabel>
-              <InputText class="input-text" id="firstName" v-model="firstName"/>
-              <label for="firstName">Name</label>
-            </FloatLabel>
-            <FloatLabel>
-              <InputText class="input-text" id="lastName" v-model="lastName"/>
-              <label for="lastName">Surname</label>
-            </FloatLabel>
+            <div class="personal-information__first-name">
+              <label for="firstName">Name *</label>
+              <InputText class="input-text" id="firstName" v-model="paymentForm.firstName" :class="{ 'input-text--error': v$.firstName.$error }"/>
+              <div class="field-input-error-wrapper" v-for="error of v$.firstName.$errors" :key="error.$uid">
+                <div class="field-input-error">
+                  {{ error.$message }}
+                </div>
+              </div>
+            </div>
+            <div class="personal-information__last-name">
+              <label for="lastName">Surname *</label>
+              <InputText class="input-text" id="lastName" v-model="paymentForm.lastName" :class="{ 'input-text--error': v$.firstName.$error }"/>
+              <div class="field-input-error-wrapper" v-for="error of v$.lastName.$errors" :key="error.$uid">
+                <div class="field-input-error">
+                  {{ error.$message }}
+                </div>
+              </div>
+            </div>
             <Button label="Next" class="button" @click="nextCallback"/>
           </div>
         </template>
@@ -19,40 +29,58 @@
       <StepperPanel header="Contact information">
         <template #content="{ prevCallback, nextCallback }">
           <div class="contact-info base-shadow">
-            <FloatLabel class="contact-info__field-email">
-              <InputText id="email" v-model="email" class="input-text"/>
+            <div class="contact-info__field-email">
               <label for="email">Email</label>
-            </FloatLabel>
-            <FloatLabel class="contact-info__field-phone">
-              <PhoneInput v-model="phones[0]"/>
-              <button @click="addPhoneNumber" :style="{ visibility: phones.length < 3 ? 'visible' : 'hidden' }"><i
+              <InputText id="email" v-model="paymentForm.email" class="input-text" :class="{ 'input-text--error': v$.email.$error }"/>
+              <div class="field-input-error-wrapper" v-for="error of v$.email.$errors" :key="error.$uid">
+                <div class="field-input-error">
+                  {{ error.$message }}
+                </div>
+              </div>
+            </div>
+            <div class="contact-info__field-phone">
+              <PhoneInput v-model="paymentForm.phones[0]"/>
+              <button @click="addPhoneNumber" :style="{ visibility: paymentForm.phones.length < 3 ? 'visible' : 'hidden' }"><i
                   class="pi pi-plus-circle" style="font-size: 1rem"></i></button>
-            </FloatLabel>
-            <div v-for="(phone, index) in phones.slice(1)" :key="index" class="contact-info__field-phone">
-              <PhoneInput v-model="phones[index + 1]"/>
+            </div>
+            <div v-for="(phone, index) in paymentForm.phones.slice(1)" :key="index" class="contact-info__field-phone">
+              <PhoneInput v-model="paymentForm.phones[index + 1]"/>
               <button @click="removePhoneNumber(index + 1)"><i class="pi pi-minus-circle" style="font-size: 1rem"></i>
               </button>
             </div>
-            <Dropdown v-model="selectedCountry" :options="countries" filter optionLabel="name.common"
-                      class="contact-info__field-country input-text">
-              <template #value="slotProps">
-                <div v-if="slotProps.value">
-                  <div>{{ slotProps.value.name.common }}</div>
-                </div>
-                <span v-else>
+            <div class="contact-info__field-country">
+              <label for="address">Country *</label>
+              <Dropdown v-model="paymentForm.selectedCountry" :options="countries" filter optionLabel="name.common"
+                        class="contact-info__field-country input-text" :class="{ 'input-text--error': v$.selectedCountry.$error }">
+                <template #value="slotProps">
+                  <div v-if="slotProps.value">
+                    <div>{{ slotProps.value.name.common }}</div>
+                  </div>
+                  <span v-else>
             {{ slotProps.placeholder }}
         </span>
-              </template>
-              <template #option="slotProps">
-                <div>
-                  <div>{{ slotProps.option.name.common }}</div>
+                </template>
+                <template #option="slotProps">
+                  <div>
+                    <div>{{ slotProps.option.name.common }}</div>
+                  </div>
+                </template>
+              </Dropdown>
+              <div class="field-input-error-wrapper" v-for="error of v$.selectedCountry.$errors" :key="error.$uid">
+                <div class="field-input-error">
+                  {{ error.$message }}
                 </div>
-              </template>
-            </Dropdown>
-            <FloatLabel class="contact-info__field-address">
-              <InputText id="email" v-model="address" class="input-text"/>
-              <label for="address">Address</label>
-            </FloatLabel>
+              </div>
+            </div>
+            <div class="contact-info__field-address">
+              <label for="address">Address *</label>
+              <InputText id="email" v-model="paymentForm.address" class="input-text" :class="{ 'input-text--error': v$.address.$error }"/>
+              <div class="field-input-error-wrapper" v-for="error of v$.address.$errors" :key="error.$uid">
+                <div class="field-input-error">
+                  {{ error.$message }}
+                </div>
+              </div>
+            </div>
             <div class="wrapper-buttons">
               <Button label="Back" class="button" severity="secondary" @click="prevCallback"/>
               <Button label="Next" class="button" @click="nextCallback"/>
@@ -74,12 +102,12 @@
                 <transition name="slide-fade-up">
                   <div
                       class="card-item__numberItem"
-                      v-if="$index > 4 && $index < cardNumber.length - 4 && cardNumber.length > $index && n.trim() !== ''"
+                      v-if="$index > 4 && $index < paymentForm.cardNumber.length - 4 && paymentForm.cardNumber.length > $index && n.trim() !== ''"
                   >*</div>
                   <div class="card-item__numberItem"
                        :class="{ '-active' : n.trim() === '' }"
-                       :key="$index" v-else-if="cardNumber.length > $index">
-                    {{ cardNumber[$index] }}
+                       :key="$index" v-else-if="paymentForm.cardNumber.length > $index">
+                    {{ paymentForm.cardNumber[$index] }}
                   </div>
                   <div
                       class="card-item__numberItem"
@@ -95,7 +123,7 @@
                   <div class="card-item__cvv">
                     <div class="card-item__cvvTitle">CVV</div>
                     <div class="card-item__cvvBand">
-                <span v-for="(n, $index) in cardCvv" :key="$index">
+                <span v-for="(n, $index) in paymentForm.cardCvv" :key="$index">
                   *
                 </span>
                     </div>
@@ -104,32 +132,41 @@
               </div>
               <div class="card-form__inner base-shadow">
                 <div class="card-input">
-                  <label for="cardNumber" class="card-input__label">Card Number</label>
-                  <input :type="inputTypeNumber" id="cardNumber" class="input-text" v-model="cardNumber" v-maska
+                  <label for="cardNumber" class="card-input__label">Card Number *</label>
+                  <input :type="inputTypeNumber" id="cardNumber" class="input-text" v-model="paymentForm.cardNumber" v-maska
                          :data-maska="generateCardNumberMask" @blur="blurInput" data-ref="cardNumber"
-                         autocomplete="off"><i class="pi" :class="eyeIconClassInputNumber"
+                         autocomplete="off" :class="{ 'input-text--error': v$.cardNumber.$error }"><i class="pi" :class="eyeIconClassInputNumber"
                                                @click="toggleInputNumberType"></i>
+                  <div class="field-input-error-wrapper" v-for="error of v$.cardNumber.$errors" :key="error.$uid">
+                    <div class="field-input-error">
+                      {{ error.$message }}
+                    </div>
+                  </div>
                 </div>
                 <div class="card-form__row">
                   <div class="card-form__col -cvv">
                     <div class="card-input">
-                      <label for="cardCvv" class="card-input__label">CVV</label>
-                      <InputOtp v-model="cardCvv" :length="3">
+                      <label for="cardCvv" class="card-input__label">CVV *</label>
+                      <InputOtp v-model="paymentForm.cardCvv" :length="3">
                         <template #default="{ attrs, events }">
                           <input :type="inputTypeCVV" v-bind="attrs" v-on="events" class="custom-otp-input"
-                                 @focus="flipCard(true)" @blur="flipCard(false)" autocomplete="off"><i class="pi"
+                                 @focus="flipCard(true)" @blur="flipCard(false)" autocomplete="off" :class="{ 'custom-otp-input--error': v$.cardCvv.$error }"><i class="pi"
                                                                                                        :class="eyeIconClassInputCVV"
                                                                                                        @click="toggleInputCVVType"></i>
                         </template>
                       </InputOtp>
                     </div>
                     <div class="agree-field">
-                      <Checkbox v-model="checkedAgree" :binary="true" class="custom-checkbox agree-field__checkbox"/>
-                      <div class="agree-field__text">Agreement with terms of use</div>
+                      <Checkbox v-model="paymentForm.checkedAgree" :binary="true" class="custom-checkbox agree-field__checkbox" :class="{ 'agree-field__checkbox--error': v$.checkedAgree.$error }"/>
+                      <div class="agree-field__text">Agreement with terms of use *</div>
                     </div>
                   </div>
                 </div>
               </div>
+            </div>
+            <div class="payment-button-wrapper">
+              <Button label="Back" class="button" severity="secondary" @click="prevCallback"/>
+              <Button label="Pay" class="button" @click="goToPay"/>
             </div>
           </div>
         </template>
@@ -139,7 +176,7 @@
 </template>
 
 <script setup lang="ts">
-import {computed, ref, onMounted} from 'vue';
+import {computed, ref, onMounted, reactive} from 'vue';
 import Stepper from 'primevue/stepper';
 import StepperPanel from 'primevue/stepperpanel';
 import Checkbox from 'primevue/checkbox';
@@ -147,40 +184,76 @@ import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
 import PhoneInput from "~/components/fields/PhoneInput.vue";
+import { useVuelidate } from "@vuelidate/core";
+import { required, email, minLength, maxLength } from "@vuelidate/validators";
 
-const cardNumber = ref("");
-const cardCvv = ref("");
+
 const isCardFlipped = ref(false);
 const focusElementStyle = ref(null);
 const isInputFocused = ref(false);
-
-const email = ref("");
-const phone = ref("");
-const country = ref(null);
-const address = ref("");
-const firstName = ref(null);
-const lastName = ref(null);
-const phones = ref(['']);
-const selectedCountry = ref('');
-const checkedAgree = ref(false);
 
 const inputTypeNumber = ref('password');
 const inputTypeCVV = ref('password');
 const eyeIconClassInputNumber = ref('pi pi-eye');
 const eyeIconClassInputCVV = ref('pi pi-eye');
 
+const paymentForm = reactive({
+  email: "",
+  address: "",
+  firstName: "",
+  lastName: "",
+  phones: [''],
+  selectedCountry: '',
+  checkedAgree: false,
+  cardNumber: "",
+  cardCvv: "",
+})
+
+const rules = {
+  email: { email },
+  address: { required },
+  firstName: { required },
+  lastName: { required },
+  phones: { required },
+  checkedAgree: { required, checked: value => value === true },
+  selectedCountry: { required },
+  cardNumber: {
+    required,
+    minLength: minLength(15),
+    format: value => /^(\d{4} \d{6} \d{5}|\d{4} \d{4} \d{4} \d{4})$/.test(value)
+  },
+  cardCvv: {
+    required,
+    minLength: minLength(3),
+    maxLength: maxLength(3),
+  },
+};
+
+const v$ = useVuelidate(rules, paymentForm);
+
+const goToPay = () => {
+  console.log("0")
+  v$.value.$touch();
+  console.log("1")
+  console.log(v$.value);
+  if (v$.value.$invalid) {
+    return;
+  }
+  console.log("2")
+};
+
 onMounted(async () => {
   await fetchCountries();
 });
 
 const addPhoneNumber = () => {
-  if (phones.value.length < 3) {
-    phones.value.push('');
+  if (paymentForm.phones.length < 3) {
+    paymentForm.phones.push('');
   }
 };
 
 const removePhoneNumber = (index) => {
-  phones.value.splice(index, 1);
+  paymentForm.phones.splice(index, 1);
 };
 
 const toggleInputNumberType = () => {
@@ -194,7 +267,7 @@ const toggleInputCVVType = () => {
 };
 
 const getCardType = computed(() => {
-  let number = cardNumber.value;
+  let number = paymentForm.cardNumber;
   if (/^4/.test(number)) return "visa";
   if (/^(34|37)/.test(number)) return "amex";
   if (/^5[1-5]/.test(number)) return "mastercard";
@@ -218,7 +291,6 @@ const blurInput = () => {
       focusElementStyle.value = null;
     }
   }, 300);
-  console.log(cardNumber.value);
 };
 
 const submitForm = () => {
@@ -230,22 +302,5 @@ const submitForm = () => {
 @import "@/assets/scss/payment-details";
 
 
-.payment {
-  display: flex;
-  flex-direction: column;
-  height: 100vh;
-  padding: 30px 20px;
 
-  .personal-information {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 35px 0 35px 0;
-    border-radius: 15px;
-    gap: 30px;
-    width: 500px;
-    margin: 30px auto;
-  }
-}
 </style>

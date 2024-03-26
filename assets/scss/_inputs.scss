@@ -8,6 +8,10 @@
   transition: all 0.2s;
   background: transparent;
   border-bottom: 2px solid var(--surface-500);
+
+  &--error {
+    border-bottom: 2px solid red;
+  }
 }
 
 .custom-otp-input:focus {
@@ -34,6 +38,7 @@
   background: none;
   color: #1a3b5d;
   font-family: "Source Sans Pro", sans-serif;
+  margin-top: 5px;
 
   &:hover,
   &:focus {
@@ -43,6 +48,16 @@
   &:focus {
     box-shadow: 0 10px 20px -13px rgba(32, 56, 117, 0.35);
   }
+
+  &--error {
+    border: 1px solid red;
+  }
+}
+
+.field-input-error {
+  color: red;
+  font-size: 12px;
+  padding: 5px 2px;
 }
 
 input.p-dropdown-filter.p-inputtext.p-component {

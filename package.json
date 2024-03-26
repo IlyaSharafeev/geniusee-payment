@@ -11,6 +11,8 @@
   },
   "dependencies": {
     "@nuxt/image": "^1.4.0",
+    "@vuelidate/core": "^2.0.3",
+    "@vuelidate/validators": "^2.0.4",
     "axios": "^1.6.8",
     "libphonenumber-js": "^1.10.58",
     "maska": "^2.1.11",
