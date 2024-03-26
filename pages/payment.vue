@@ -172,6 +172,7 @@
         </template>
       </StepperPanel>
     </Stepper>
+    <Toast />
   </div>
 </template>
 
@@ -183,11 +184,13 @@ import Checkbox from 'primevue/checkbox';
 import Button from 'primevue/button';
 import InputText from 'primevue/inputtext';
 import Dropdown from 'primevue/dropdown';
+import { useToast } from 'primevue/usetoast';
+
 import PhoneInput from "~/components/fields/PhoneInput.vue";
 import { useVuelidate } from "@vuelidate/core";
 import { required, email, minLength, maxLength } from "@vuelidate/validators";
 
-
+const toast = useToast();
 const isCardFlipped = ref(false);
 const focusElementStyle = ref(null);
 const isInputFocused = ref(false);
@@ -237,9 +240,11 @@ const goToPay = () => {
   console.log("1")
   console.log(v$.value);
   if (v$.value.$invalid) {
+    toast.add({ severity: 'error', summary: 'Error validation!', detail: 'Fix the mistakes and try again.', life: 3000 });
     return;
   }
   console.log("2")
+  toast.add({ severity: 'success', summary: 'Congratulations!', detail: 'You have successfully paid!', life: 3000 });
 };
 
 onMounted(async () => {
