@@ -1,5 +1,6 @@
 <template>
   <div>
+    <div class="title-input">Phone *</div>
     <MazPhoneNumberInput
         class="input"
         @input="setPhone"
@@ -10,7 +11,6 @@
         :preferred-countries="['FR', 'BE', 'DE', 'US', 'GB']"
         :ignored-countries="['AC']"
         @update="results = $event"
-        :success="results?.isValid"
     />
   </div>
 </template>
@@ -42,7 +42,7 @@ const setPhone = () => {
 
 <style scoped lang="scss">
 .title-input {
-  color: white;
+  color: #334125;
   width: 100%;
   margin-bottom: 15px;
 }

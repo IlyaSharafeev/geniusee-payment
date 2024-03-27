@@ -1,12 +1,12 @@
 <template xmlns="http://www.w3.org/1999/html">
   <div class="payment">
-    <Stepper orientation="vertical">
+    <Stepper orientation="vertical" :active-step="activeStep">
       <StepperPanel header="Personal information">
         <template #content="{ nextCallback }">
           <div class="personal-information base-shadow">
             <div class="personal-information__first-name">
               <label for="firstName">Name *</label>
-              <InputText class="input-text" id="firstName" v-model="paymentForm.firstName" :class="{ 'input-text--error': v$.firstName.$error }"/>
+              <InputText class="input-text" id="firstName" ref="firstNameRef" v-model="paymentForm.firstName" :class="{ 'input-text--error': v$.firstName.$error }"/>
               <div class="field-input-error-wrapper" v-for="error of v$.firstName.$errors" :key="error.$uid">
                 <div class="field-input-error">
                   {{ error.$message }}
@@ -15,7 +15,7 @@
             </div>
             <div class="personal-information__last-name">
               <label for="lastName">Surname *</label>
-              <InputText class="input-text" id="lastName" v-model="paymentForm.lastName" :class="{ 'input-text--error': v$.firstName.$error }"/>
+              <InputText class="input-text" id="lastName" ref="lastNameRef" v-model="paymentForm.lastName" :class="{ 'input-text--error': v$.firstName.$error }"/>
               <div class="field-input-error-wrapper" v-for="error of v$.lastName.$errors" :key="error.$uid">
                 <div class="field-input-error">
                   {{ error.$message }}
@@ -31,7 +31,7 @@
           <div class="contact-info base-shadow">
             <div class="contact-info__field-email">
               <label for="email">Email</label>
-              <InputText id="email" v-model="paymentForm.email" class="input-text" :class="{ 'input-text--error': v$.email.$error }"/>
+              <InputText id="email" v-model="paymentForm.email" ref="emailRef" class="input-text" :class="{ 'input-text--error': v$.email.$error }"/>
               <div class="field-input-error-wrapper" v-for="error of v$.email.$errors" :key="error.$uid">
                 <div class="field-input-error">
                   {{ error.$message }}
@@ -39,7 +39,7 @@
               </div>
             </div>
             <div class="contact-info__field-phone">
-              <PhoneInput v-model="paymentForm.phones[0]" :class="{ 'contact-info__field-phone--error': v$.phones.$error }"/>
+              <PhoneInput v-model="paymentForm.phones[0]" ref="phonesRef" :class="{ 'contact-info__field-phone--error': v$.phones.$error }"/>
               <button @click="addPhoneNumber" :style="{ visibility: paymentForm.phones.length < 3 ? 'visible' : 'hidden' }"><i
                   class="pi pi-plus-circle" style="font-size: 1rem"></i></button>
             </div>
@@ -72,7 +72,7 @@
                 </div>
               </div>
             </div>
-            <div class="contact-info__field-address">
+            <div class="contact-info__field-address" ref="addressRef">
               <label for="address">Address *</label>
               <InputText id="email" v-model="paymentForm.address" class="input-text" :class="{ 'input-text--error': v$.address.$error }"/>
               <div class="field-input-error-wrapper" v-for="error of v$.address.$errors" :key="error.$uid">
@@ -194,11 +194,22 @@ const toast = useToast();
 const isCardFlipped = ref(false);
 const focusElementStyle = ref(null);
 const isInputFocused = ref(false);
+const activeStep = ref(0);
 
 const inputTypeNumber = ref('password');
 const inputTypeCVV = ref('password');
 const eyeIconClassInputNumber = ref('pi pi-eye');
 const eyeIconClassInputCVV = ref('pi pi-eye');
+
+const emailRef = ref(null) as any;
+const addressRef = ref(null) as any;
+const firstNameRef = ref(null) as any;
+const lastNameRef = ref(null) as any;
+const phonesRef = ref(null) as any;
+const selectedCountryRef = ref(null) as any;
+const checkedAgreeRef = ref(false) as any;
+const cardNumberRef = ref("") as any;
+const cardCvvRef = ref("") as any;
 
 const paymentForm = reactive({
   email: "",
@@ -217,7 +228,7 @@ const rules = {
   address: { required },
   firstName: { required },
   lastName: { required },
-  phones: { required, hasPhone: value => value.some(phone => phone !== '') },
+  phones: { required, hasPhone: value => value.some(phone => phone !== ['']) },
   checkedAgree: { required, checked: value => value === true },
   selectedCountry: { required },
   cardNumber: {
@@ -234,18 +245,71 @@ const rules = {
 
 const v$ = useVuelidate(rules, paymentForm);
 
-const goToPay = () => {
+const goToPay = async () => {
   console.log("0")
   v$.value.$touch();
   console.log("1")
   console.log(v$.value);
+
   if (v$.value.$invalid) {
+    scrollToFirstErrorForm();
     toast.add({ severity: 'error', summary: 'Error validation!', detail: 'Fix the mistakes and try again.', life: 3000 });
     return;
   }
   console.log("2")
+
+  await new Promise(resolve => setTimeout(resolve, 1000));
+
   toast.add({ severity: 'success', summary: 'Congratulations!', detail: 'You have successfully paid!', life: 3000 });
 };
+
+const scrollToFirstErrorForm = () => {
+  if(v$.value.firstName) {
+    activeStep.value = 0;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+    return;
+  }
+
+  if(v$.value.lastName) {
+    activeStep.value = 0;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.email) {
+    activeStep.value = 1;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.phones) {
+    activeStep.value = 1;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.selectedCountry) {
+    activeStep.value = 1;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.address) {
+    activeStep.value = 1;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.cardNumber) {
+    activeStep.value = 2;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.cardCvv) {
+    activeStep.value = 2;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+
+  if(v$.value.checkedAgree) {
+    activeStep.value = 2;
+    addressRef.value.scrollIntoView({ behavior: 'smooth' });
+  }
+}
 
 onMounted(async () => {
   await fetchCountries();
@@ -296,10 +360,6 @@ const blurInput = () => {
       focusElementStyle.value = null;
     }
   }, 300);
-};
-
-const submitForm = () => {
-  console.log("Форма відправлена!");
 };
 </script>
 
